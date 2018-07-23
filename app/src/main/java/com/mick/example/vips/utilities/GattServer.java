@@ -77,7 +77,14 @@ public class GattServer {
             public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
                 super.onConnectionStateChange(device, status, newState);
                 Log.i(mAppManager.TAG, "onConnectionStateChange: " + newState);
-                devices.add(device);
+                if (newState == 2) {
+                    devices.add(device);
+                } else {
+                    devices.remove(device);
+                    if (devices.size() == 0) {
+                        reinit();
+                    }
+                }
             }
 
             @Override
@@ -177,10 +184,25 @@ public class GattServer {
         }
     }
 
+    private void disconnectedAll() {
+        if (devices.size() != 0) {
+            for (int i = 0; i < devices.size(); i++) {
+                mGattServer.cancelConnection(devices.get(i));
+            }
+        }
+    }
+
     public void releaseResource() {
         mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
         mGattServer.clearServices();
+        disconnectedAll();
         mGattServer.close();
+    }
+
+    public void reinit() {
+        releaseResource();
+        startAdvertising();
+        startServer();
     }
 
     private AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {

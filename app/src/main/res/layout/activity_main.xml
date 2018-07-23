@@ -6,34 +6,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dark_grey"
-    android:padding="@dimen/box_inset_layout_padding"
     android:keepScreenOn="true"
+    android:padding="@dimen/box_inset_layout_padding"
     tools:context=".activitives.MainActivity"
     tools:deviceIds="wear">
 
-    <RelativeLayout
+    <FrameLayout
+        android:id="@+id/main_fragment_placeholder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="@dimen/inner_frame_layout_padding"
-        app:boxedEdges="all">
+        android:layout_height="match_parent">
 
-
-        <ImageView
-            android:id="@+id/main_ImageView_djembe"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_centerInParent="true"
-            android:onClick="onClick"
-            android:src="@drawable/djembe" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/main_ImageView_djembe"
-            android:layout_centerHorizontal="true"
-            android:text="Djembe" />
-
-    </RelativeLayout>
+    </FrameLayout>
 
     <android.support.wear.widget.drawer.WearableNavigationDrawerView
         android:id="@+id/top_navigation_drawer"

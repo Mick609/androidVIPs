@@ -1,8 +1,10 @@
 package com.mick.example.vips.models;
 
+import com.mick.example.vips.domains.Model;
+
 import static java.lang.Math.exp;
 
-public class model1 {
+public class model1 extends Model {
     static double Logistic(double x) {
         return (1 / (1 + exp(-x)));
     }

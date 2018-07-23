@@ -1,29 +1,29 @@
 package com.mick.example.vips.activitives;
 
 import android.content.Context;
-import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.support.wear.widget.drawer.WearableDrawerLayout;
-import android.support.wear.widget.drawer.WearableDrawerView;
 import android.support.wear.widget.drawer.WearableNavigationDrawerView;
-import android.support.wearable.activity.WearableActivity;
 import android.view.View;
-import android.widget.TextView;
 
 import com.mick.example.vips.R;
 import com.mick.example.vips.adapters.NavigationDrawerAdapter;
 import com.mick.example.vips.domains.Gesture;
 import com.mick.example.vips.domains.SensorData;
+import com.mick.example.vips.fragments.DjembeFragment;
+import com.mick.example.vips.fragments.SettingFragment;
 import com.mick.example.vips.utilities.AppManager;
 import com.mick.example.vips.utilities.GattServer;
 
-public class MainActivity extends WearableActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
-    private TextView mTextView;
     private AppManager mAppManager;
+    FragmentTransaction ft;
 
     private WearableDrawerLayout mWearableDrawerLayout;
     private WearableNavigationDrawerView mWearableNavigationDrawer;
@@ -57,7 +57,9 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         mAppManager = new AppManager(this);
         mContext = this;
 
-        mTextView = (TextView) findViewById(R.id.text);
+        ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.main_fragment_placeholder, new DjembeFragment());
+        ft.commit();
 
         mWearableDrawerLayout = findViewById(R.id.main_drawer_layout);
         // Top navigation drawer
@@ -69,24 +71,18 @@ public class MainActivity extends WearableActivity implements SensorEventListene
             @Override
             public void onItemSelected(int pos) {
                 nextPosition = pos;
+                if (nextPosition == 0) {
+                    ft = getSupportFragmentManager().beginTransaction();
+                    ft.replace(R.id.main_fragment_placeholder, new DjembeFragment());
+                    ft.commit();
+                } else if (nextPosition == 1) {
+                    ft = getSupportFragmentManager().beginTransaction();
+                    ft.replace(R.id.main_fragment_placeholder, new SettingFragment());
+                    ft.commit();
+                }
                 mAppManager.mLog("Drawer pos: " + pos);
             }
         });
-
-        mWearableDrawerLayout.setDrawerStateCallback(new WearableDrawerLayout.DrawerStateCallback() {
-            @Override
-            public void onDrawerClosed(WearableDrawerLayout layout, WearableDrawerView drawerView) {
-                super.onDrawerClosed(layout, drawerView);
-                if (nextPosition != 0) {
-                    Intent i = new Intent(mContext, SettingActivity.class);
-                    startActivity(i);
-                    finish();
-                }
-            }
-        });
-
-        // Enables Always-on
-        setAmbientEnabled();
 
         mGattServer = new GattServer(this);
         mGattServer.startServer();
@@ -110,10 +106,21 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     }
 
     public void onClick(View view) {
-
-        if (view.getId() == R.id.main_ImageView_djembe) {
-            mGattServer.updateCharacteristicValue("Click");
-            mGattServer.notifyAllDevices();
+        switch (view.getId()) {
+            case R.id.main_ImageView_djembe:
+                mGattServer.updateCharacteristicValue("Click");
+                mGattServer.notifyAllDevices();
+                break;
+            case R.id.setting_quit:
+                mGattServer.releaseResource();
+                mSensorManager.unregisterListener(this);
+                finish();
+                break;
+            case R.id.setting_reinit:
+                mGattServer.reinit();
+                break;
+            default:
+                break;
         }
     }
 
